@@ -1,0 +1,4 @@
+ip: "mysql_dev"
+dbname: "films"
+user: "user"
+pass: "password"

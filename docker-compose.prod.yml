@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0.35-debian
@@ -9,5 +10,19 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
+
+  apache:
+    build: ./docker/production
+    container_name: apache_prod
+    restart: always
+    volumes:
+      - ./api:/var/www/html/api
+      - ./utils:/var/www/html/utils
+      - ./docker/production/.env:/var/www/html/.env
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
 volumes:
   mysql_data:
