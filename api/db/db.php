@@ -1,183 +1,90 @@
 <?php
 
-//Guardo los datos de conexión de la base de datos en un fichero YML
+// Función para obtener la configuración de la base de datos desde el archivo YML
 function getDBConfig() {
-    $dbFileConfig=dirname(__FILE__)."/../../dbconfiguration.yml";
+    $dbFileConfig = "/var/www/html/dbconfiguration.yml"; // Ruta fija para evitar errores de ubicación
 
-    $configYML = yaml_parse_file($dbFileConfig);//necesita la extensión php-yaml
+    if (!file_exists($dbFileConfig)) {
+        die("Error: El archivo de configuración de la base de datos no existe.");
+    }
+    
+    $configYML = yaml_parse_file($dbFileConfig);
+    if (!$configYML) {
+        die("Error: No se pudo leer el archivo de configuración de la base de datos.");
+    }
 
-	$cad = sprintf("mysql:dbname=%s;host=%s;charset=UTF8", $configYML["dbname"], $configYML["ip"]);
-
-    $result = array(
-        "cad" => $cad,
+    return [
+        "cad" => sprintf("mysql:dbname=%s;host=%s;charset=UTF8", $configYML["dbname"], $configYML["ip"]),
         "user" => $configYML["user"],
         "pass" => $configYML["pass"]
-    );
-
-	return $result;
+    ];
 }
 
+// Función para establecer la conexión con la base de datos
 function getDBConnection() {
     try {
         $res = getDBConfig();
-
         $bd = new PDO($res["cad"], $res["user"], $res["pass"]);
-
+        $bd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $bd;
-    } catch(PDOException $e) {
-        return null;
-    }
-}
-
-/* ------------ LOGIN --------------- */
-function checkLogin($email, $password) {
-    try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-            $sqlPrepared = $bd->prepare("SELECT email from user WHERE email = :email AND password = :password " );
-            $params = array(
-                ':email' => $email,
-                ':password' => $password
-            );
-            $sqlPrepared->execute($params);
-
-            return $sqlPrepared->rowCount() > 0 ? true : false;
-         } else
-            return $bd;
-
     } catch (PDOException $e) {
-       return null;
+        die("Error de conexión a la base de datos: " . $e->getMessage());
     }
 }
 
-
-/* ------------ PELÍCULAS  --------------- */
+/* ------------ PELÍCULAS --------------- */
 function getFilmsDB() {
     try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-            $sqlPrepared = $bd->prepare("SELECT id,name, director, classification from film");
-            $sqlPrepared->execute();
-
-            return $sqlPrepared->fetchAll(PDO::FETCH_ASSOC);
-        } else
-            return $bd;
-
+        $bd = getDBConnection();
+        $sqlPrepared = $bd->prepare("SELECT id, name, director, classification FROM film");
+        $sqlPrepared->execute();
+        return $sqlPrepared->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-       return null;
+        die("Error al obtener películas: " . $e->getMessage());
     }
 }
 
 function getFilmDB($id) {
     try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-            $sqlPrepared = $bd->prepare("SELECT * from film WHERE id = :id");
-            $params = array(
-                ':id' => $id,
-            );
-            $sqlPrepared->execute($params);
-
-            return $sqlPrepared->fetchAll(PDO::FETCH_ASSOC);
-        } else
-            return $bd;
-
+        $bd = getDBConnection();
+        $sqlPrepared = $bd->prepare("SELECT * FROM film WHERE id = :id");
+        $sqlPrepared->execute([":id" => $id]);
+        return $sqlPrepared->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-       return null;
+        die("Error al obtener película: " . $e->getMessage());
     }
 }
 
 function addFilmDB($data) {
     try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-
-            $sqlPrepared = $bd->prepare("
-                INSERT INTO film (name,director,classification,img,plot)
-                VALUES (:name,:director,:classification,:img,:plot)
-            ");
-
-            $params = array(
-                ':name' => $data["name"],
-                ':director' => $data["director"],
-                ':classification' => $data["classification"],
-                ':img' => $data["img"],
-                ':plot' => $data["plot"]
-            );
-
-            return $sqlPrepared->execute($params);
-
-            return $sqlPrepared->rowCount();// check affected rows using rowCount
-
-        } else
-            return $bd;
-
+        $bd = getDBConnection();
+        $sqlPrepared = $bd->prepare(
+            "INSERT INTO film (name, director, classification, img, plot) VALUES (:name, :director, :classification, :img, :plot)"
+        );
+        return $sqlPrepared->execute($data);
     } catch (PDOException $e) {
-       return null;
+        die("Error al añadir película: " . $e->getMessage());
     }
 }
 
-
 function updateFilmDB($data) {
     try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-
-            $sqlPrepared = $bd->prepare("
-                UPDATE film
-                SET name=:name,director=:director,classification=:classification,img=:img,plot=:plot
-                WHERE id=:id
-            ");
-
-            $params = array(
-                ':name' => $data["name"],
-                ':director' => $data["director"],
-                ':classification' => $data["classification"],
-                ':img' => $data["img"],
-                ':plot' => $data["plot"],
-                ':id' => $data["id"]
-            );
-
-            return $sqlPrepared->execute($params);
-
-            return $sqlPrepared->rowCount();// check affected rows using rowCount
-
-        } else
-            return $bd;
-
+        $bd = getDBConnection();
+        $sqlPrepared = $bd->prepare(
+            "UPDATE film SET name=:name, director=:director, classification=:classification, img=:img, plot=:plot WHERE id=:id"
+        );
+        return $sqlPrepared->execute($data);
     } catch (PDOException $e) {
-       return null;
+        die("Error al actualizar película: " . $e->getMessage());
     }
 }
 
 function deleteFilmDB($id) {
     try {
-    	$bd = getDBConnection();
-
-        if(!is_null($bd)) {
-
-            $sqlPrepared = $bd->prepare("
-                DELETE FROM film
-                WHERE id=:id
-            ");
-
-            $params = array(
-                ':id' => $id
-            );
-
-            return $sqlPrepared->execute($params);
-
-            return $sqlPrepared->rowCount();// check affected rows using rowCount
-
-        } else
-            return $bd;
-
+        $bd = getDBConnection();
+        $sqlPrepared = $bd->prepare("DELETE FROM film WHERE id=:id");
+        return $sqlPrepared->execute([":id" => $id]);
     } catch (PDOException $e) {
-       return null;
+        die("Error al eliminar película: " . $e->getMessage());
     }
 }
