@@ -1,0 +1,22 @@
+# Archivos de entorno
+.env
+docker/production/.env
+docker/development/.env
+
+# Archivos de configuración sensibles
+dbconfiguration.yml
+
+# Datos persistentes de la base de datos
+mysql_data/
+
+# Caché de PHP y logs
+*.log
+*.cache
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Dependencias de Composer (si usas Composer en el backend)
+vendor/
+composer.lock

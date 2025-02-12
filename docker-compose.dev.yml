@@ -1,13 +1,11 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0.35-debian
     container_name: mysql_dev
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: films
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+    env_file: docker/development/.env
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
@@ -19,9 +17,10 @@ services:
     restart: always
     volumes:
       - ./api:/var/www/html/api
+      - ./db:/var/www/html/db
       - ./utils:/var/www/html/utils
-      - ./db:/var/www/html/db 
-      - ./docker/development/.env:/var/www/html/.env
+      - ./dbconfiguration.yml:/var/www/html/dbconfiguration.yml  # ⬅️ Línea añadida
+      - ./docker/development/apache-dev.conf:/etc/apache2/sites-available/000-default.conf
     ports:
       - "8080:80"
     depends_on:
