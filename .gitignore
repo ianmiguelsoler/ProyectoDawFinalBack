@@ -20,3 +20,4 @@ Thumbs.db
 # Dependencias de Composer (si usas Composer en el backend)
 vendor/
 composer.lock
+films_dump.sql

@@ -1,13 +1,13 @@
 FROM debian
 LABEL maintainer="ianmiguel@gmail.com"
 
-# Actualizar repositorios e instalar dependencias
+# Instalar Apache, PHP y dependencias necesarias
 RUN apt update && apt install -y apache2 php libapache2-mod-php php-mysql php-yaml curl
 
-# Habilitar módulos de Apache necesarios
+# Habilitar módulos de Apache
 RUN a2enmod rewrite headers
 
-# Copiar la configuración del VirtualHost de producción
+# Copiar la configuración del VirtualHost para producción
 COPY apache-prod.conf /etc/apache2/sites-available/000-default.conf
 
 # Habilitar el VirtualHost
