@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0.35-debian
@@ -5,7 +7,7 @@ services:
     restart: always
     env_file: docker/production/.env
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_prod_data:/var/lib/mysql
     ports:
       - "3306:3306"
 
@@ -17,11 +19,12 @@ services:
       - ./api:/var/www/html/api
       - ./db:/var/www/html/db
       - ./utils:/var/www/html/utils
+      - ./dbconfiguration.yml:/var/www/html/dbconfiguration.yml
       - ./docker/production/apache-prod.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - "8080:80"
+      - "80:80"  # 🔹 En producción, mapea el puerto 80 para acceso público
     depends_on:
       - mysql
 
 volumes:
-  mysql_data:
+  mysql_prod_data:
