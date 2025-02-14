@@ -18,12 +18,12 @@ services:
     depends_on:
       - mysql
     environment:
-      - DB_CONFIG=/var/www/html/dbconfiguration.prod.yml  # 🔹 Se añade esta línea
+      - DB_CONFIG=/var/www/html/dbconfiguration.yml  # ✅ Se define correctamente la variable de entorno
     volumes:
       - ./api:/var/www/html/api
       - ./db:/var/www/html/db
       - ./utils:/var/www/html/utils
-      - ./dbconfiguration.prod.yml:/var/www/html/dbconfiguration.yml  # 🔹 Se usa el archivo de producción
+      - ./dbconfiguration.yml:/var/www/html/dbconfiguration.yml  # ✅ Se usa el archivo sin el ".prod"
       - ./docker/production/apache-prod.conf:/etc/apache2/sites-available/000-default.conf
     ports:
       - "80:80"

@@ -1,4 +1,4 @@
-ip: "mysql_dev"
+ip: "mysql"
 dbname: "films"
-user: "user"
-pass: "password"
+user: "films_user"
+pass: "films_prod_password"
