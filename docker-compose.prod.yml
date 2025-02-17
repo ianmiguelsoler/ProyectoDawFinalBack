@@ -5,7 +5,7 @@ services:
     image: mysql:8.0.35-debian
     container_name: mysql_prod
     restart: always
-    env_file: ./docker/production/.env
+    env_file: docker/production/.env
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
@@ -15,18 +15,16 @@ services:
     build: ./docker/production
     container_name: apache_prod
     restart: always
-    depends_on:
-      - mysql
-    environment:
-      - DB_CONFIG=/var/www/html/dbconfiguration.yml  # ✅ Se define correctamente la variable de entorno
     volumes:
       - ./api:/var/www/html/api
       - ./db:/var/www/html/db
       - ./utils:/var/www/html/utils
-      - ./dbconfiguration.yml:/var/www/html/dbconfiguration.yml  # ✅ Se usa el archivo sin el ".prod"
+      - ./dbconfiguration.yml:/var/www/html/dbconfiguration.yml
       - ./docker/production/apache-prod.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - "80:80"
+      - "8080:80"  # ⬅️ Cambiado de "80:80" a "8080:80" para que coincida con el frontend
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
